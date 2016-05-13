@@ -1,0 +1,59 @@
+/* Tune some bootstrap stuff */
+
+html {
+    overflow-y: scroll;
+}
+body {
+    padding-bottom: 70px;
+}
+.navbar {
+    margin: 0px;
+}
+.quirkboard-boardmenu {
+    cursor: pointer;
+}
+.quirkboard-jumbotron {
+    position: relative;
+    font-size: 24px;
+    color: #fff;
+    color: rgba(255, 255, 255, .75);
+    text-align: center;
+    background-color: rgba(0, 0, 0, .75);
+    ;
+    border-radius: 0px;
+}
+.quirkboard-threadsubject {
+    cursor: pointer;
+    margin-bottom: 0px;
+    font-weight: bold;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 1.0);
+}
+.quirkboard-messageinfo {
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.5);
+}
+.quirkboard-message {
+    white-space: pre-wrap;
+    margin-bottom: 0px;
+    font-weight: normal;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 1.0);
+}
+.quirkboard-submitform {
+    margin: 0 auto;
+    width: 50%;
+}
+.quirkboard-button {
+    font-weight: normal;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 1.0);
+}
+
+/* Angular hide site before loaded */
+
+[ng\:cloak], [ng-cloak], .ng-cloak {
+    display: none !important;
+}

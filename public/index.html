@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html lang="en" ng-app="app">
+
+<head>
+    <title>Quirkboard</title>
+
+    <!-- Viewport sizing on different platforms -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Stylesheets -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+
+<body ng-cloak>
+    <div ng-controller="MainController">
+
+        <!-- Website menu -->
+        <div class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <a href="#" class="navbar-brand">{{config.appName}} {{config.appVersion}}</a>
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navHeaderCollapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <div class="collapse navbar-collapse navHeaderCollapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#" ng-click="selectedThread={id: -1};">{{selectedBoard.name}}</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Boards<b class="caret"></b></a>
+                            <ul class="dropdown-menu quirkboard-boardmenu">
+                                <li ng-repeat="board in boards">
+                                    <a ng-click="selectBoard(board)">{{board.name}} - {{board.description}}</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#">About</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jumbotron -->
+        <div class="jumbotron jumbotron-fluid quirkboard-jumbotron">
+            <div class="container">
+                <h1>{{selectedBoard.name}} {{selectedBoard.description}}</h1>
+                <p>Threads: {{selectedBoard.stats.threads}} Messages: {{selectedBoard.stats.threads + selectedBoard.stats.messages}}</p>
+            </div>
+        </div>
+
+        <!-- Submit thread/message -->
+        <div class="container">
+            <form name="threadForm" ng-submit="postThread(newThread, uploadFile, selectedBoard)" ng-show="selectedThread.id < 0">
+                <div class="quirkboard-submitform">
+                    <div class="form-group row">
+                        <div class="col-lg-6">
+                            <label for="subject">Subject:</label>
+                            <input type="text" class="form-control" id="subject" ng-model="newThread.subject" placeholder="Your thread's subject...">
+                        </div>
+                        <div class="col-lg-6">
+                            <label for="subject">File (.png, .jpg):</label>
+                            <input type="file" class="form-control file" id="fileThread" fileread="newThread.file">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message (required):</label>
+                        <textarea class="form-control" rows="5" id="message" ng-model="newThread.message" placeholder="Your message..."></textarea>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-6">
+                            <p class="bg-danger" ng-show="submitError">{{submitStatus}}</p>
+                            <p class="bg-success" ng-show="!submitError">{{submitStatus}}</p>
+                        </div>
+                        <div class="col-lg-6">
+                            <button type="submit" class="btn btn-default quirkboard-button pull-right">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <form name="messageForm" ng-submit="postMessage(newMessage, uploadFile, selectedThread)" ng-show="selectedThread.id >= 0">
+                <div class="quirkboard-submitform">
+                    <div class="form-group">
+                        <label for="subject">File (.png, .jpg):</label>
+                        <input type="file" class="form-control file" id="fileMessage" fileread="newMessage.file">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message (required):</label>
+                        <textarea class="form-control" rows="5" id="message" ng-model="newMessage.message" placeholder="Your message..."></textarea>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-6">
+                            <p class="bg-danger" ng-show="submitError">{{submitStatus}}</p>
+                            <p class="bg-success" ng-show="!submitError">{{submitStatus}}</p>
+                        </div>
+                        <div class="col-lg-6">
+                            <button type="submit" class="btn btn-default quirkboard-button pull-right">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Threads, board -->
+        <div class="container" ng-show="selectedThread.id < 0">
+            <ul class="media-list">
+                <div class="media" ng-repeat="thread in selectedBoard.threads">
+                    <div class="media-left">
+                        <span class="glyphicon glyphicon-arrow-up"></span>
+                        <center>{{thread.points}}</center>
+                        <span class="glyphicon glyphicon-arrow-down"></span>
+                    </div>
+                    <div class="media-left" ng-show="thread.filesrc">
+                        <img class="media-object" ng-src="/content/uploads/{{thread.filesrc || '../null.png'}}" width="64px" height="64px">
+                    </div>
+                    <div class="media-body">
+                        <a class="quirkboard-threadsubject" ng-click="selectThread(thread)">{{thread.subject}}</a>
+                        <p class="quirkboard-messageinfo">#{{thread.id}} {{thread.created}}</p>
+                        <p class="quirkboard-message">{{thread.message}}</p>
+                        <div class="media" ng-repeat="message in thread.messages | orderBy: 'modified': true | limitTo: config.msgPreviewCount">
+                            <div class="media-left">
+                                <span class="glyphicon glyphicon-arrow-up"></span>
+                                <center>{{message.points}}</center>
+                                <span class="glyphicon glyphicon-arrow-down"></span>
+                            </div>
+                            <div class="media-left" ng-show="message.filesrc">
+                                <img class="media-object" ng-src="/content/uploads/{{message.filesrc || '../null.png'}}" width="64px" height="64px">
+                            </div>
+                            <div class="media-body">
+                                <p class="quirkboard-messageinfo">#{{message.id}} {{message.created}}</p>
+                                <p class="quirkboard-message">{{message.message}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ul>
+        </div>
+
+        <!-- Messages, thread -->
+        <div class="container" ng-show="selectedThread.id >= 0">
+            <ul class="media-list">
+                <div class="media">
+                    <div class="media-left">
+                        <span class="glyphicon glyphicon-arrow-up"></span>
+                        <center>{{thread.points}}</center>
+                        <span class="glyphicon glyphicon-arrow-down"></span>
+                    </div>
+                    <div class="media-left" ng-show="selectedThread.filesrc">
+                        <img class=" media-object" ng-src="/content/uploads/{{selectedThread.filesrc}}" width="64px" height="64px">
+                    </div>
+                    <div class="media-body">
+                        <p class="quirkboard-threadsubject">{{selectedThread.subject}}</p>
+                        <p class="quirkboard-messageinfo">#{{selectedThread.id}} {{selectedThread.created}}</p>
+                        <p class="quirkboard-message">{{selectedThread.message}}</p>
+                        <div class="media" ng-repeat="message in selectedThread.messages | orderBy: 'id': false">
+                            <div class="media-left">
+                                <span class="glyphicon glyphicon-arrow-up"></span>
+                                <center>{{message.points}}</center>
+                                <span class="glyphicon glyphicon-arrow-down"></span>
+                            </div>
+                            <div class="media-left" ng-show="message.filesrc">
+                                <img class="media-object" ng-src="/content/uploads/{{message.filesrc || '../null.png'}}" width="64px" height="64px">
+                            </div>
+                            <div class="media-body">
+                                <p class="quirkboard-messageinfo">#{{message.id}} {{message.created}}</p>
+                                <p class="quirkboard-message">{{message.message}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ul>
+        </div>
+
+        <!-- Bottom navbar -->
+        <div class="navbar navbar-default navbar-fixed-bottom">
+            <div class="container">
+                <p class="navbar-text"><span class="glyphicon glyphicon-copyright-mark"></span> Nyymi 2016</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Javascript includes -->
+    <script src="/js/main.js"></script>
+    <script src="/js/jquery-1.12.2.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</body>
+
+</html>
